@@ -24,7 +24,7 @@ export const signUp: RequestHandler = async (req, res) => {
             }
         })
         return res.status(200).json({message:"User created Sucessfully "})
-    } catch (error) {
+    } catch (error:any) {
         res.status(500).json({error:"INternal Server Error"})
     }
 
@@ -44,7 +44,7 @@ export const signUp: RequestHandler = async (req, res) => {
 
         generateToken(user.id,res)
         res.status(200).json(user);
-    } catch (error) {
+    } catch (error:any) {
         res.status(500).json({message:"Internal Server Error"})
     }
 }
@@ -57,7 +57,7 @@ export const logout:RequestHandler=(req,res)=>{
             sameSite:"lax",
         })
         res.status(200).json({message:"Logged Out Sucessfully"});
-    } catch (error) {
+    } catch (error:any) {
         res.status(500).json({message:"Internal Server Error"});
     }
 }

@@ -1,5 +1,6 @@
-import {Router} from XPathExpression;
-import {protect} from "../middleware/auth.middleware"
+import {Router} from "express";
+import {protectRoute} from "../middleware/auth.middleware";
+import {getTransactions,createTransaction,updateTransaction,deleteTransaction,getSummary} from "../controllers/transaction.controller"
 
 const router = Router();
 
@@ -10,5 +11,5 @@ router.delete("/:id",protectRoute,deleteTransaction)
 router.get("/summary",protectRoute,getSummary);
 
 
-
+export default Router;
 
