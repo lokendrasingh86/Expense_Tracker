@@ -38,7 +38,7 @@ model Category{
 
 model Transaction{
   id Int @id @default(autoincrement())
-  amount Decimal 
+  amount Float
   description String
   date DateTime @default(now())
   type String
@@ -50,7 +50,7 @@ model Transaction{
 
 model Budget{
   id Int @id @default(autoincrement())
-  budgetAmount Decimal 
+  budgetAmount Float
   startDate DateTime
   endDate DateTime
   userId Int

@@ -5,7 +5,7 @@ import { generateToken } from "../lib/utils";
 
 
 export const signUp: RequestHandler = async (req, res) => { 
-    const {fullName,password,email}=req.body();
+    const {fullName,password,email}= req.body;
     if(!fullName || !email || !password){
         return res.status(400).json({message:"Invalid Body"});
     }
