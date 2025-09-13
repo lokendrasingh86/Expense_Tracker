@@ -57,7 +57,7 @@ export const monthlySpendingTrends:RequestHandler=async (req,res) =>{
     }
 }
 
-export const budgetVsActuals:RequestHandler= async (req,res)=>{
+export const budgetVsActual:RequestHandler= async (req,res)=>{
     try {
         const userId = req.user?.id;
         const budgets = await prisma.budget.findMany({

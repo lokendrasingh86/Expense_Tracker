@@ -2,11 +2,12 @@ import { RequestHandler } from "express";
 import {prisma} from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils";
+import { string } from "zod";
 
 
 export const signUp: RequestHandler = async (req, res) => { 
     const {fullName,password,email}= req.body;
-    if(!fullName || !email || !password){
+    if(!fullName|| !email || !password){
         return res.status(400).json({message:"Invalid Body"});
     }
     try {
