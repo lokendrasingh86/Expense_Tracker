@@ -3,7 +3,8 @@ import "./App.css";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/loginPage";
 import ProtectRoute from "./components/ProtectRoute";
-import DashBoardPage from "./pages/DashBoardPage";
+import DashboardPage from "./pages/DashBoardPage";
+
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route element={<ProtectRoute />}>
-          <Route path="/dashboard" element={<DashBoardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
       </Routes>
     </>

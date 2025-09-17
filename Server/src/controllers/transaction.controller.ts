@@ -35,14 +35,13 @@ export const createTransaction: RequestHandler = async (req, res) => {
       return res.status(400).json({ errors: parsed.error.flatten() });
     }
     const { amount, description, type, categoryId } = parsed.data;
+    const category = await prisma.category.findFirst({
+      where: { id: categoryId, userId },
+    });
+    if (!category) {
+      return res.status(400).json({ message: "Invalid categoryId" });
+    }
 
-    await prisma.category.create({
-    data: {
-      categoryName: "Default Category",
-      categoryType: "expense", 
-      userId: userId,
-    },
-});
     const transaction = await prisma.transaction.create({
       data: {
         amount,
@@ -52,6 +51,7 @@ export const createTransaction: RequestHandler = async (req, res) => {
         description,
         date: new Date(),
       },
+      include: { category: true },
     });
     res.status(201).json(transaction);
   } catch (error: any) {
@@ -63,30 +63,48 @@ export const createTransaction: RequestHandler = async (req, res) => {
 export const updateTransaction: RequestHandler = async (req, res) => {
   try {
     const userId = (req as any).userId;
-    const { id } = (req as any).params;
+    const { id } = req.params;
+
     const parsed = transactionSchema.partial().safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ errors: parsed.error.flatten() });
     }
+
     const transaction = await prisma.transaction.findFirst({
       where: { id: Number(id), userId },
     });
+
     if (!transaction) {
-      return res.status(404).json({ message: "Transaction not Found" });
+      return res.status(404).json({ message: "Transaction not found" });
     }
+
     const updated = await prisma.transaction.update({
       where: { id: transaction.id },
       data: {
-        amount: parsed.data.amount!,
+        ...(parsed.data.description !== undefined && {
+          description: parsed.data.description,
+        }),
+        ...(parsed.data.amount !== undefined && {
+          amount: parsed.data.amount,
+        }),
+        ...(parsed.data.categoryId !== undefined && {
+          categoryId: parsed.data.categoryId,
+        }),
+        ...(parsed.data.type !== undefined && {
+          type: parsed.data.type,
+        }),
       },
+      include: { category: true },
     });
+
     res.json(updated);
   } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: error.message || "Failed to update Transaction" });
+    res.status(500).json({
+      message: error.message || "Failed to update transaction",
+    });
   }
 };
+
 
 
 export const deleteTransaction: RequestHandler = async (req, res) => {

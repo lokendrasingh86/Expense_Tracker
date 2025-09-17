@@ -5,7 +5,7 @@ import { budgetVsActual, monthlySpendingTrends, spendingByCategory } from "../co
 const router = Router();
 
 router.get('/spending-by-category',protectRoute,spendingByCategory);
-router.get('/monthly-trends',protectRoute,monthlySpendingTrends);
+router.get('/monthly-spending-trends',protectRoute,monthlySpendingTrends);
 router.get("/budget-vs-actuals",protectRoute,budgetVsActual)
 
 export default router;

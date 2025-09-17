@@ -8,6 +8,13 @@ import budgetRoutes from "./routes/budget.routes";
 import categoriesRoutes from "./routes/categories.routes";
 import analyticsRoutes from "./routes/analytics.routes";
 import cors from "cors";
+// const [summaryRes, spendingRes, trendsRes, budgetRes, transactionsRes] = await Promise.all([
+//         axiosInstance.get('/transaction/summary'),
+//         axiosInstance.get('/analytics/spending-by-category'),
+//         axiosInstance.get('/analytics/monthly-spending-trends'),
+//         axiosInstance.get('/analytics/budget-vs-actuals'),
+//         axiosInstance.get('/transaction') 
+//       ]);
 
 dotenv.config();
 const app = express();
