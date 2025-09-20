@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils";
 import { string } from "zod";
+import jwt from "jsonwebtoken";
 
 export const signUp: RequestHandler = async (req, res) => {
   const { fullName, password, email } = req.body;
@@ -57,7 +58,7 @@ export const login: RequestHandler = async (req, res) => {
     if (!pass) {
       return res.status(400).json({ error: "Invalid FullName or Password" });
     }
-
+     
     generateToken(user.id, res);
     res.status(200).json(user);
   } catch (error: any) {

@@ -13,12 +13,12 @@ export const getTransactions: RequestHandler = async (req, res) => {
   try {
     console.log("Hello");
 
-    const userId = (req as any).userId;
-    // if (!userId) {
-    //   return res.status(401).json({ message: "Unauthorized" });
-    // }
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const transactions = await prisma.transaction.findMany({
-      where: { userId },
+      where: { userId:Number(userId) },
       include: { category: true },
       orderBy: { date: "desc" },
     });
