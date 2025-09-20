@@ -74,8 +74,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, Target, MoreHorizontal } from "lucide-react";
 
 // --- Axios Instance for API calls ---
-// FIX: Using the standard path alias. This requires a correctly configured tsconfig.json.
-import { axiosInstance } from "@/lib/axios";
+// FIX: Using a direct relative path to resolve the import error.
+import { axiosInstance } from "../lib/axios";
+
 
 // --- Types to Match Your Backend ---
 type Category = {
@@ -91,6 +92,7 @@ type Transaction = {
   category: Category;
   categoryId: number;
 };
+
 type Summary = {
   totalIncome: number;
   totalExpense: number;
@@ -111,15 +113,31 @@ type BudgetVsActual = {
   budgeted: number;
   spent: number;
 };
-
+type Budget = {
+  id: number;
+  budgetAmount: number;
+  startDate: string;
+  endDate: string;
+  category: Category;
+  categoryId: number;
+};
+type BudgetSummary = {
+  id: number;
+  budgetAmount: number;
+  startDate: string;
+  endDate: string;
+  category: Category;
+  totalSpent: number;
+  remaining: number;
+};
 // --- Helper for Pie Chart Colors ---
 const COLORS = [
-  "#111827",
-  "#6B7280",
-  "#374151",
-  "#9CA3AF",  
-  "#4B5563",
-  "#D1D5DB",
+  "#0088FE", // blue
+  "#00C49F", // green
+  "#FFBB28", // yellow
+  "#FF8042", // orange
+  "#A020F0", // purple
+  "#FF1493", // pink
 ];
 
 // --- Main Dashboard Component ---
@@ -128,6 +146,8 @@ const DashboardPage: FC = () => {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]); // New state for budgets
+  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null); // New state for a single budget summary
   const [spendingData, setSpendingData] = useState<SpendingByCategory[]>([]);
   const [trendsData, setTrendsData] = useState<MonthlySpendingTrend[]>([]);
   const [budgetData, setBudgetData] = useState<BudgetVsActual[]>([]);
@@ -139,6 +159,7 @@ const DashboardPage: FC = () => {
   const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
   const [isIncomeDialogOpen, setIsIncomeDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isBudgetSummaryDialogOpen, setIsBudgetSummaryDialogOpen] = useState(false);
 
   const [newExpense, setNewExpense] = useState({
     categoryId: 0,
@@ -165,94 +186,96 @@ const DashboardPage: FC = () => {
 
   const [activeTab, setActiveTab] = useState("spending");
 
-const fetchData = async () => {
-  setError(null);
-  try {
-    const [
-      summaryRes,
-      transactionsRes,
-      spendingRes,
-      trendsRes,
-      budgetRes,
-      categoriesRes, // ✅ fetch categories
-    ] = await Promise.all([
-      axiosInstance.get("/transaction/summary"),
-      axiosInstance.get("/transaction"),
-      axiosInstance.get("/analytics/spending-by-category"),
-      axiosInstance.get("/analytics/monthly-spending-trends"),
-      axiosInstance.get("/analytics/budget-vs-actuals"),
-      axiosInstance.get("/categories"), // ✅ added
-    ]);
+  const fetchData = async () => {
+    setError(null);
+    try {
+      const [
+        summaryRes,
+        transactionsRes,
+        spendingRes,
+        trendsRes,
+        budgetRes,
+        categoriesRes,
+        budgetsRes, // ✅ Fetch all budgets
+      ] = await Promise.all([
+        axiosInstance.get("/transaction/summary"),
+        axiosInstance.get("/transaction"),
+        axiosInstance.get("/analytics/spending-by-category"),
+        axiosInstance.get("/analytics/monthly-spending-trends"),
+        axiosInstance.get("/analytics/budget-vs-actuals"),
+        axiosInstance.get("/categories"),
+        axiosInstance.get("/budgets"), // ✅ New fetch call
+      ]);
 
-    setSummary(summaryRes.data);
-    setTransactions(transactionsRes.data);
+      setSummary(summaryRes.data);
+      setTransactions(transactionsRes.data);
+      setBudgets(budgetsRes.data); // ✅ Set the budgets state
 
-    const spendingJson: SpendingByCategory[] = spendingRes.data;
-    const budgetJson: BudgetVsActual[] = budgetRes.data;
+      const spendingJson: SpendingByCategory[] = spendingRes.data;
+      const budgetJson: BudgetVsActual[] = budgetRes.data;
 
-    const categoryNameMap = new Map<number, string>();
-    spendingJson.forEach((item) =>
-      categoryNameMap.set(item.categoryId, item.categoryName)
-    );
-    const enrichedBudgetData = budgetJson.map((budget) => ({
-      ...budget,
-      categoryName:
-        categoryNameMap.get(budget.categoryId) ||
-        `Category ${budget.categoryId}`,
-    }));
+      const categoryNameMap = new Map<number, string>();
+      spendingJson.forEach((item) =>
+        categoryNameMap.set(item.categoryId, item.categoryName)
+      );
+      const enrichedBudgetData = budgetJson.map((budget) => ({
+        ...budget,
+        categoryName:
+          categoryNameMap.get(budget.categoryId) ||
+          `Category ${budget.categoryId}`,
+      }));
 
-    setSpendingData(spendingJson);
-    setTrendsData(trendsRes.data);
-    setBudgetData(enrichedBudgetData);
-
-    // ✅ use real categories instead of deriving from transactions
-    setCategories(categoriesRes.data);
-  } catch (err) {
-    console.error("Dashboard Fetch Error:", err);
-    setError(
-      "Could not load dashboard data. Please make sure your backend server is running."
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-useEffect(() => {
-  setIsLoading(true);
-  fetchData();
-}, []);
-
-const handleAddTransaction = async (
-  type: "income" | "expense",
-  data: { categoryId: number; amount: string; description: string }
-) => {
-  try {
-    if (!data.categoryId || data.categoryId === 0) {
-      alert("Please select a category");
-      return;
+      setSpendingData(spendingJson);
+      setTrendsData(trendsRes.data);
+      setBudgetData(enrichedBudgetData);
+      setCategories(categoriesRes.data);
+    } catch (err) {
+      console.error("Dashboard Fetch Error:", err);
+      setError(
+        "Could not load dashboard data. Please make sure your backend server is running."
+      );
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const payload = {
-      description: data.description,
-      amount: parseFloat(data.amount),
-      categoryId: Number(data.categoryId), // ✅ now guaranteed valid
-      type,
-    };
-    console.log("Payload before POST:", payload);
-
-    await axiosInstance.post("/transaction", payload);
-
-    setIsExpenseDialogOpen(false);
-    setIsIncomeDialogOpen(false);
-    setNewExpense({ categoryId: 0, amount: "", description: "" });
-    setNewIncome({ categoryId: 0, amount: "", description: "" });
-
+  useEffect(() => {
     setIsLoading(true);
-    await fetchData();
-  } catch (error) {
-    console.error(`Failed to add ${type}:`, error);
-  }
-};
+    fetchData();
+  }, []);
+
+  const handleAddTransaction = async (
+    type: "income" | "expense",
+    data: { categoryId: number; amount: string; description: string }
+  ) => {
+    try {
+      if (!data.categoryId || data.categoryId === 0) {
+        // Use a modal or UI message instead of alert
+        console.error("Please select a category");
+        return;
+      }
+
+      const payload = {
+        description: data.description,
+        amount: parseFloat(data.amount),
+        categoryId: Number(data.categoryId),
+        type,
+      };
+      console.log("Payload before POST:", payload);
+
+      await axiosInstance.post("/transaction", payload);
+
+      setIsExpenseDialogOpen(false);
+      setIsIncomeDialogOpen(false);
+      setNewExpense({ categoryId: 0, amount: "", description: "" });
+      setNewIncome({ categoryId: 0, amount: "", description: "" });
+
+      setIsLoading(true);
+      await fetchData();
+    } catch (error) {
+      console.error(`Failed to add ${type}:`, error);
+    }
+  };
 
 
   const handleUpdateTransaction = async (e: React.FormEvent) => {
@@ -293,7 +316,7 @@ const handleAddTransaction = async (
         startDate: new Date(newBudget.startDate),
         endDate: new Date(newBudget.endDate),
       };
-      await axiosInstance.post("/budget", payload);
+      await axiosInstance.post("/budgets", payload);
       setIsBudgetDialogOpen(false);
       setNewBudget({
         categoryId: 0,
@@ -316,6 +339,35 @@ const handleAddTransaction = async (
     }
   };
 
+  const handleUpdateBudget = async (id: number, updatedAmount: number) => {
+    try {
+      const payload = { budgetAmount: updatedAmount };
+      await axiosInstance.put(`/budgets/${id}`, payload);
+      await fetchData();
+    } catch (error) {
+      console.error("Failed to update budget:", error);
+    }
+  };
+
+  const handleDeleteBudget = async (id: number) => {
+    try {
+      await axiosInstance.delete(`/budgets/${id}`);
+      await fetchData();
+    } catch (error) {
+      console.error("Failed to delete budget:", error);
+    }
+  };
+
+  const handleGetBudgetSummary = async (id: number) => {
+    try {
+      const response = await axiosInstance.get(`/budgets/${id}/summary`);
+      setBudgetSummary(response.data);
+      setIsBudgetSummaryDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to get budget summary:", error);
+    }
+  };
+
   const openEditDialog = (transaction: Transaction) => {
     setEditingTransaction(transaction);
     setIsEditDialogOpen(true);
@@ -332,14 +384,7 @@ const handleAddTransaction = async (
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
-///Testing For LineGraph
-//   const mockTrendsData = [
-//   { month: "Jan", total: 1200 },
-//   { month: "Feb", total: 900 },
-//   { month: "Mar", total: 1500 },
-//   { month: "Apr", total: 800 },
-//   { month: "May", total: 2000 },
-// ];
+
   return (
     <div className="bg-gray-50 min-h-screen p-4 sm:p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -788,6 +833,86 @@ const handleAddTransaction = async (
           </DialogContent>
         </Dialog>
 
+        {/* --- Budget Management Section (NEW) --- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Budget Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date Range</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {budgets.length > 0 ? (
+                  budgets.map((b) => (
+                    <TableRow key={b.id}>
+                      <TableCell>
+                        <div className="font-medium">{b.category.categoryName}</div>
+                      </TableCell>
+                      <TableCell>₹{b.budgetAmount.toFixed(2)}</TableCell>
+                      <TableCell>{new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleUpdateBudget(b.id, b.budgetAmount + 100)}>Update (+₹100)</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteBudget(b.id)}>Delete</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleGetBudgetSummary(b.id)}>View Summary</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-gray-500">
+                      No budgets set.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* --- Budget Summary Dialog (NEW) --- */}
+        <Dialog open={isBudgetSummaryDialogOpen} onOpenChange={setIsBudgetSummaryDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Budget Summary</DialogTitle>
+              <DialogDescription>
+                Overview of your budget for {budgetSummary?.category.categoryName}.
+              </DialogDescription>
+            </DialogHeader>
+            {budgetSummary && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Budgeted Amount:</span>
+                  <span>₹{budgetSummary.budgetAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total Spent:</span>
+                  <span>₹{budgetSummary.totalSpent.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Remaining:</span>
+                  <span>₹{budgetSummary.remaining.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+        
         <Card>
           <CardHeader>
             <CardTitle>Analytics</CardTitle>

@@ -1,9 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/loginPage";
 import ProtectRoute from "./components/ProtectRoute";
-import DashboardPage from "./pages/DashBoardPage";
+import DashboardPage from "./pages/DashboardPage";
 
 
 function App() {

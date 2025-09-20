@@ -12,16 +12,19 @@ const transactionSchema = z.object({
 export const getTransactions: RequestHandler = async (req, res) => {
   try {
     console.log("Hello");
-    
+
     const userId = (req as any).userId;
+    // if (!userId) {
+    //   return res.status(401).json({ message: "Unauthorized" });
+    // }
     const transactions = await prisma.transaction.findMany({
       where: { userId },
       include: { category: true },
       orderBy: { date: "desc" },
     });
-    console.log(transactions)
+    console.log(transactions);
     res.json(transactions);
-  } catch (error:any) {
+  } catch (error: any) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -47,7 +50,7 @@ export const createTransaction: RequestHandler = async (req, res) => {
         amount,
         type,
         categoryId,
-        userId:userId,
+        userId: userId,
         description,
         date: new Date(),
       },
@@ -58,7 +61,6 @@ export const createTransaction: RequestHandler = async (req, res) => {
     res.status(500).json({ message: error.message || "Internal Server Error" });
   }
 };
-
 
 export const updateTransaction: RequestHandler = async (req, res) => {
   try {
@@ -105,8 +107,6 @@ export const updateTransaction: RequestHandler = async (req, res) => {
   }
 };
 
-
-
 export const deleteTransaction: RequestHandler = async (req, res) => {
   try {
     const userId = (req as any).userId;
@@ -133,7 +133,7 @@ export const getSummary: RequestHandler = async (req, res) => {
     const summary = await prisma.transaction.groupBy({
       by: ["type"],
       _sum: { amount: true },
-      where: {userId: Number(userId)},
+      where: { userId: Number(userId) },
     });
 
     const income = summary.find((s) => s.type === "income")?._sum?.amount ?? 0;

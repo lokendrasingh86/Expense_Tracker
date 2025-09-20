@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -29,11 +28,12 @@ model Category{
   id Int @id @default(autoincrement())
   categoryName String
   categoryType String
-  userId Int 
-  user User @relation(fields: [userId],references: [id])
+  userId Int ?
+  user User? @relation(fields: [userId],references: [id])
   transactions Transaction[]
   budgets Budget[]
 
+  @@unique([categoryName, userId])
 }
 
 model Transaction{
@@ -56,5 +56,5 @@ model Budget{
   userId Int
   user User @relation(fields: [userId],references: [id])
   categoryId Int
-  category Category @relation(fields: [categoryId],references: [id])
+  category Category @relation(fields: [categoryId],references: [id],onDelete: Cascade)
 }
