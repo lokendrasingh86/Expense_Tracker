@@ -1,18 +1,7 @@
 import type { FC } from "react";
-
-// --- Component Imports ---
-// In your project, you'll add these using the shadcn/ui CLI.
-// For example: `npx shadcn-ui@latest add button`
 import { Button } from "@/components/ui/button";
-
-// Icons are typically added from a library like lucide-react.
-// Run: `npm install lucide-react`
 import { ArrowRight, ShieldCheck, BarChart3, Download } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// --- Helper Components ---
-
-// We can add types to our custom helper components.
 interface FeatureIconProps {
   icon: "budget" | "chart" | "export";
 }

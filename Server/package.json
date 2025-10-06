@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rmdir /s /q dist"
+  },
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "bcrypt": "^6.0.0",
