@@ -100,14 +100,6 @@ const DashboardPage: FC = () => {
       {/* Summary Cards */}
       <SummaryCards summary={summary} isLoading={isLoading} />
 
-      {/* Charts */}
-      <DashboardCharts
-        spendingData={spendingData}
-        trendsData={trendsData}
-        budgetData={budgetData}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
 
       {/* Transactions Table */}
       <TransactionsTable
@@ -120,6 +112,15 @@ const DashboardPage: FC = () => {
         handleUpdateTransaction={handleUpdateTransaction}
         handleDeleteTransaction={handleDeleteTransaction}
         openEditDialog={openEditDialog}
+      />
+
+       {/* Charts */}
+      <DashboardCharts
+        spendingData={spendingData}
+        trendsData={trendsData}
+        budgetData={budgetData}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
     </div>
   );

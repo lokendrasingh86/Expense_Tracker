@@ -65,55 +65,101 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
       </CardHeader>
       <CardContent>
         {activeTab === "spending" && (
-          <ResponsiveContainer width="100%" height={350}>
-            <PieChart>
-              <Pie
-                data={spendingData}
-                cx="50%"
-                cy="50%"
-                innerRadius={80}
-                outerRadius={120}
-                label
-              >
-                {spendingData.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          <>
+            {spendingData && spendingData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={spendingData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={120}
+                    label
+                  >
+                    {spendingData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-[350px] items-center justify-center text-gray-500">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">📊</div>
+                  <div className="text-lg font-medium">No Expenses Yet</div>
+                  <div className="text-sm mt-2">
+                    Start adding expenses to see your spending breakdown by
+                    category
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === "trends" && (
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={trendsData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="income" stroke="#00C49F" />
-              <Line type="monotone" dataKey="expense" stroke="#FF8042" />
-            </LineChart>
-          </ResponsiveContainer>
+          <>
+            {trendsData && trendsData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={trendsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="income" stroke="#00C49F" />
+                  <Line type="monotone" dataKey="expense" stroke="#FF8042" />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-[350px] items-center justify-center text-gray-500">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">📈</div>
+                  <div className="text-lg font-medium">
+                    No Transaction History
+                  </div>
+                  <div className="text-sm mt-2">
+                    Add some income and expenses to see your monthly trends
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === "budget" && (
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={budgetData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="budget" fill="#0088FE" />
-              <Bar dataKey="actual" fill="#FF8042" />
-            </BarChart>
-          </ResponsiveContainer>
+          <>
+            {budgetData && budgetData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={budgetData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="category" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="budget" fill="#0088FE" />
+                  <Bar dataKey="actual" fill="#FF8042" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-[350px] items-center justify-center text-gray-500">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🎯</div>
+                  <div className="text-lg font-medium">No Budgets Set</div>
+                  <div className="text-sm mt-2">
+                    Create budgets for different categories to track your
+                    spending goals
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
