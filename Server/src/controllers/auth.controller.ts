@@ -2,8 +2,6 @@ import { RequestHandler } from "express";
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils";
-import { string } from "zod";
-import jwt from "jsonwebtoken";
 
 export const signUp: RequestHandler = async (req, res) => {
   const { fullName, password, email } = req.body;

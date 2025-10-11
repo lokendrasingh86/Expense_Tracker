@@ -106,35 +106,42 @@ export const useDashboardData = () => {
       setIsLoading(true);
       setError(null);
 
-      // Fetch essential data first
+      // Fetch essential data first with faster timeout
       const [summaryRes, transactionsRes, categoriesRes] = await Promise.all([
         axiosInstance
-          .get("/transaction/summary")
+          .get("/transaction/summary", { timeout: 5000 })
           .catch(() => ({
             data: { totalIncome: 0, totalExpense: 0, balance: 0 },
           })),
-        axiosInstance.get("/transaction").catch(() => ({ data: [] })),
-        axiosInstance.get("/categories").catch(() => ({ data: [] })),
+        axiosInstance
+          .get("/transaction", { timeout: 5000 })
+          .catch(() => ({ data: [] })),
+        axiosInstance
+          .get("/categories", { timeout: 5000 })
+          .catch(() => ({ data: [] })),
       ]);
 
-      // Fetch optional data
-      const budgetsRes = await axiosInstance
-        .get("/budgets")
-        .catch(() => ({ data: [] }));
-      const budgetSummaryRes = await axiosInstance
-        .get("/analytics/budget-summary")
-        .catch(() => ({
-          data: { totalBudget: 0, totalSpent: 0, remainingBudget: 0 },
-        }));
-      const spendingRes = await axiosInstance
-        .get("/analytics/spending-by-category")
-        .catch(() => ({ data: [] }));
-      const trendsRes = await axiosInstance
-        .get("/analytics/monthly-spending-trends")
-        .catch(() => ({ data: [] }));
-      const budgetDataRes = await axiosInstance
-        .get("/analytics/budget-vs-actuals")
-        .catch(() => ({ data: [] }));
+      // Fetch optional data with optimized parallel requests
+      const [budgetsRes, spendingRes, trendsRes, budgetDataRes] =
+        await Promise.all([
+          axiosInstance
+            .get("/budgets", { timeout: 5000 })
+            .catch(() => ({ data: [] })),
+          axiosInstance
+            .get("/analytics/spending-by-category", { timeout: 5000 })
+            .catch(() => ({ data: [] })),
+          axiosInstance
+            .get("/analytics/monthly-spending-trends", { timeout: 5000 })
+            .catch(() => ({ data: [] })),
+          axiosInstance
+            .get("/analytics/budget-vs-actuals", { timeout: 5000 })
+            .catch(() => ({ data: [] })),
+        ]);
+
+      // Use default data for non-existent endpoint
+      const budgetSummaryRes = {
+        data: { totalBudget: 0, totalSpent: 0, remainingBudget: 0 },
+      };
 
       const categoryNameMap = new Map<number, string>();
       categoriesRes.data.forEach((cat: Category) => {
