@@ -43,6 +43,7 @@ export const signUp: RequestHandler = async (req, res) => {
 
     return res.status(200).json({ message: "User created Sucessfully " });
   } catch (error: any) {
+    console.log(error)
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -50,6 +51,7 @@ export const signUp: RequestHandler = async (req, res) => {
 export const login: RequestHandler = async (req, res) => {
   const { email, password } = req.body;
   try {
+    
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(400).json({ error: "Invalid FullName Or Password" });
@@ -62,6 +64,7 @@ export const login: RequestHandler = async (req, res) => {
     generateToken(user.id, res);
     res.status(200).json(user);
   } catch (error: any) {
+    console.log(error)
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
