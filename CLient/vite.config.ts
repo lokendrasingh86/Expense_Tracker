@@ -18,13 +18,30 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: false,
     minify: "esbuild",
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          utils: ["@/lib/utils", "@/lib/axios"]
-        }
-      }
-    }
-  }
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor';
+            }
+            if (id.includes('recharts')) {
+              return 'charts';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('axios')) {
+              return 'axios';
+            }
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 });
