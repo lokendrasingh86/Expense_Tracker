@@ -11,7 +11,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server:{
-    port:3000,
+  server: {
+    port: 3000,
+  },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    minify: "esbuild",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          utils: ["@/lib/utils", "@/lib/axios"]
+        }
+      }
+    }
   }
 });

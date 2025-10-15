@@ -28,8 +28,6 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:3002",
       "https://expense-tracker-fhb67b09s-lokendra-singhs-projects-a38da751.vercel.app",
       "https://expense-tracker-7i2g.onrender.com",
       /^https:\/\/.*\.vercel\.app$/, // Allow any Vercel subdomain
