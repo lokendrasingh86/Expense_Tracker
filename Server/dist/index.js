@@ -17,7 +17,7 @@ const cors_1 = __importDefault(require("cors"));
 //         axiosInstance.get('/analytics/spending-by-category'),
 //         axiosInstance.get('/analytics/monthly-spending-trends'),
 //         axiosInstance.get('/analytics/budget-vs-actuals'),
-//         axiosInstance.get('/transaction') 
+//         axiosInstance.get('/transaction')
 //       ]);
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -26,7 +26,14 @@ app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)({
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "https://expense-tracker-7i2g.onrender.com"],
+    origin: [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "https://expense-tracker-fhb67b09s-lokendra-singhs-projects-a38da751.vercel.app",
+        "https://expense-tracker-7i2g.onrender.com",
+        /^https:\/\/.*\.vercel\.app$/ // Allow any Vercel subdomain
+    ],
     credentials: true,
 }));
 app.use("/api/auth", auth_routes_1.default);
