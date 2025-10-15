@@ -13,7 +13,7 @@ import cors from "cors";
 //         axiosInstance.get('/analytics/spending-by-category'),
 //         axiosInstance.get('/analytics/monthly-spending-trends'),
 //         axiosInstance.get('/analytics/budget-vs-actuals'),
-//         axiosInstance.get('/transaction') 
+//         axiosInstance.get('/transaction')
 //       ]);
 
 dotenv.config();
@@ -26,7 +26,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://expense-tracker-7i2g.onrender.com",
+    ],
     credentials: true,
   })
 );

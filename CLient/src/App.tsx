@@ -2,8 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/loginPage";
 import ProtectRoute from "./components/ProtectRoute";
-import DashboardPage from "./pages/DashboardPage";
-
+import DashboardPage from "./pages/DashBoardPage";
 
 function App() {
   return (
