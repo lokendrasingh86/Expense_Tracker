@@ -95,12 +95,14 @@ const logout = (req, res) => {
     try {
         res.clearCookie("token", {
             httpOnly: true,
-            sameSite: "lax",
+            sameSite: "none",
+            secure: true,
         });
-        res.status(200).json({ message: "Logged Out Sucessfully" });
+        res.status(200).json({ message: "Logged Out Successfully" });
     }
     catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Logout error:", error);
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 };
 exports.logout = logout;

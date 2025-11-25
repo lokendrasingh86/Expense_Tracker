@@ -17,19 +17,20 @@ declare global {
 
 export const protectRoute = async(req:Request,res:Response,next:NextFunction)=>{
     try {
-        const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1];
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
         if(!token){
-            return res.status(401).json({message : "Not Authoirized,No token"});
+            return res.status(401).json({message : "Not Authorized, No token"});
         }
         const decoded = jwt.verify(token,process.env.JWT_SECRET!) as JwtPayload;
 
         const user = await prisma.user.findUnique({where:{id:decoded.userId}});
         if(!user){
-            return res.status(401).json({message:"Not authorized , user not Found"});
+            return res.status(401).json({message:"Not authorized, user not found"});
         };
         req.user={id:user.id,email:user.email};
         next();
     } catch (error) {
-        res.status(401).json({message:"Not Authorized,Invalid Token"})
+        console.error("Auth middleware error:", error);
+        res.status(401).json({message:"Not Authorized, Invalid Token"});
     }
 }

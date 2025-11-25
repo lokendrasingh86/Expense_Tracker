@@ -43,15 +43,18 @@ export const useAuthStore = create<AuthState>()(
       
       login: async (data) => {
         try {
+          console.log('Attempting login with:', { email: data.email });
           // 2. Use axiosInstance and a relative path
           const response = await axiosInstance.post(`/auth/login`, data);
 
           const user = response.data;
+          console.log('Login successful, user data:', user);
           set({ isLoggedIn: true, user: user });
 
         } catch (error) {
           console.error('Login failed:', error);
           if (axios.isAxiosError(error) && error.response) {
+            console.error('Login error response:', error.response.data);
             throw new Error(error.response.data.error || 'Login failed. Please check your credentials.');
           }
           throw new Error('An unexpected error occurred during login.');
